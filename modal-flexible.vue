@@ -2,8 +2,8 @@
   <transition name="fade">
     <div
       v-show="visible"
+      ref="modal"
       class="speed-up modal-base"
-      @keyup.esc="$emit('hideModal')"
     >
       <div
         class="backdrop"
@@ -11,8 +11,8 @@
       />
       <transition
         name="fade-in-down"
-        @after-enter="$emit('opened')"
-        @after-leave="$emit('closed')"
+        @after-enter="opened"
+        @after-leave="closed"
       >
         <section
           v-if="visible"
@@ -54,11 +54,11 @@
                   {{ btnCancelText }}
                 </button>
               </div>
-              <div class="col-xs-6 col-sm-5">
+              <div class="col-xs-6">
                 <button
                   v-if="btnSubmitText"
                   class=" btn btn-success btn-loading"
-                  :disabled="disabled||isLoading"
+                  :disabled="submitDisabled||isLoading"
                   @click="$emit('submitModal')"
                 >
                   <i :class="{loading: isLoading}" />
@@ -103,9 +103,25 @@
         type: Boolean,
         default: false
       },
-      disabled: {
+      submitDisabled: {
         type: Boolean,
         default: false
+      }
+    },
+
+    methods: {
+      opened() {
+        document.addEventListener('keyup', this.escape);
+        this.$emit('opened');
+      },
+      closed() {
+        document.removeEventListener('keyup', this.escape);
+        this.$emit('closed');
+      },
+      escape(evt) {
+        if(evt.keyCode === 27) {
+          this.$emit('hideModal');
+        }
       }
     }
   };
